@@ -6,7 +6,7 @@ export type ManagedUser = {
   id: string
   email: string
   nev: string | null
-  role: 'staff' | 'admin'
+  role: 'staff' | 'admin' | 'customer'
   aktiv: boolean
   created_at: string
 }
@@ -15,7 +15,8 @@ export default async function FelhasznalokPage() {
   const { user } = await requireAdmin()
   const supabase = await createClient()
   const { data, error } = await supabase.rpc('admin_list_users')
-  const users = (data ?? []) as ManagedUser[]
+  // A vevőket (webshop) a /vevok oldal kezeli; itt csak a belső staff/admin.
+  const users = ((data ?? []) as ManagedUser[]).filter((u) => u.role !== 'customer')
 
   return (
     <div className="mx-auto max-w-4xl">

@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import { cache } from 'react'
 import { createClient } from '@/lib/supabase/server'
 
-export type Role = 'admin' | 'staff'
+export type Role = 'admin' | 'staff' | 'customer'
 
 export type Profile = {
   id: string

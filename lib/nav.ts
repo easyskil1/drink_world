@@ -41,6 +41,13 @@ export const NAV: NavSection[] = [
     ],
   },
   {
+    title: 'Webshop',
+    items: [
+      { href: '/rendelesek', label: 'Rendelések' },
+      { href: '/vevok', label: 'Vevők', adminOnly: true },
+    ],
+  },
+  {
     title: 'Adminisztráció',
     items: [
       { href: '/felhasznalok', label: 'Felhasználók', adminOnly: true },
