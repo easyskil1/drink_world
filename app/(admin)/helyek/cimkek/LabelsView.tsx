@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type CSSProperties } from 'react'
 
 export type LabelItem = {
   id: string
@@ -9,55 +9,99 @@ export type LabelItem = {
   svg: string
 }
 
-type Size = 's' | 'm' | 'l'
+type Meret = { szelesseg: number; qr: number; betu: number }
 
-const SIZE_OPTIONS: { value: Size; label: string }[] = [
-  { value: 's', label: 'Kicsi' },
-  { value: 'm', label: 'Közepes' },
-  { value: 'l', label: 'Nagy' },
-]
-
+const DEFAULT: Meret = { szelesseg: 45, qr: 22, betu: 12 }
 const STORAGE_KEY = 'helyek-cimke-meret'
 
 export function LabelsView({ labels }: { labels: LabelItem[] }) {
-  const [size, setSize] = useState<Size>('m')
+  const [m, setM] = useState<Meret>(DEFAULT)
 
-  // A választott méret megjegyzése (böngészőnként).
+  // A beállított méretek megjegyzése (böngészőnként).
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY)
-    if (saved === 's' || saved === 'm' || saved === 'l') setSize(saved)
+    if (!saved) return
+    try {
+      const parsed = JSON.parse(saved)
+      if (
+        typeof parsed?.szelesseg === 'number' &&
+        typeof parsed?.qr === 'number' &&
+        typeof parsed?.betu === 'number'
+      ) {
+        setM(parsed)
+      }
+    } catch {
+      // rossz adat: marad az alapértelmezés
+    }
   }, [])
 
-  function pick(next: Size) {
-    setSize(next)
-    localStorage.setItem(STORAGE_KEY, next)
+  function update(patch: Partial<Meret>) {
+    setM((prev) => {
+      const next = { ...prev, ...patch }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+      return next
+    })
   }
+
+  const gridStyle = {
+    '--label-w': `${m.szelesseg}mm`,
+    '--label-qr': `${m.qr}mm`,
+    '--label-code': `${m.betu}pt`,
+  } as CSSProperties
+
+  const numInput =
+    'w-20 rounded-md border border-slate-300 px-2 py-1.5 text-sm text-slate-900 outline-none focus:border-slate-500'
+  const field = 'flex items-center gap-1.5 text-sm font-medium text-slate-600'
 
   return (
     <>
-      <div className="mb-4 flex items-center gap-2 print:hidden">
-        <span className="text-sm font-medium text-slate-600">Címkeméret:</span>
-        <div className="inline-flex overflow-hidden rounded-md border border-slate-300">
-          {SIZE_OPTIONS.map((o) => (
-            <button
-              key={o.value}
-              type="button"
-              onClick={() => pick(o.value)}
-              aria-pressed={size === o.value}
-              className={
-                'px-3 py-1.5 text-sm font-medium transition ' +
-                (size === o.value
-                  ? 'bg-slate-900 text-white'
-                  : 'bg-white text-slate-700 hover:bg-slate-50')
-              }
-            >
-              {o.label}
-            </button>
-          ))}
-        </div>
+      <div className="mb-4 flex flex-wrap items-end gap-4 rounded-xl border border-slate-200 bg-white p-4 print:hidden">
+        <label className={field}>
+          Szélesség
+          <input
+            type="number"
+            min={20}
+            max={200}
+            value={m.szelesseg}
+            onChange={(e) => update({ szelesseg: Number(e.target.value) })}
+            className={numInput}
+          />
+          mm
+        </label>
+        <label className={field}>
+          QR méret
+          <input
+            type="number"
+            min={8}
+            max={120}
+            value={m.qr}
+            onChange={(e) => update({ qr: Number(e.target.value) })}
+            className={numInput}
+          />
+          mm
+        </label>
+        <label className={field}>
+          Betűméret
+          <input
+            type="number"
+            min={5}
+            max={40}
+            value={m.betu}
+            onChange={(e) => update({ betu: Number(e.target.value) })}
+            className={numInput}
+          />
+          pt
+        </label>
+        <button
+          type="button"
+          onClick={() => update(DEFAULT)}
+          className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+        >
+          Alaphelyzet
+        </button>
       </div>
 
-      <div className="labels-grid" data-size={size}>
+      <div className="labels-grid" style={gridStyle}>
         {labels.map((l) => (
           <div key={l.id} className="label">
             <div
