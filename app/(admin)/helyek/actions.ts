@@ -10,9 +10,9 @@ export type LocationFormState = { error?: string }
 const TIPUS_VALUES: LocationTipus[] = ['pick', 'raktar', 'puffer', 'karanten']
 
 function parseForm(formData: FormData) {
+  const terulet = String(formData.get('terulet') ?? '').trim()
   const sor = String(formData.get('sor') ?? '').trim()
   const polc = String(formData.get('polc') ?? '').trim()
-  const polcsor = String(formData.get('polcsor') ?? '').trim()
   const tarhely = String(formData.get('tarhely') ?? '').trim()
   const tipusRaw = String(formData.get('tipus') ?? '')
   const aktiv = formData.get('aktiv') === 'on'
@@ -20,12 +20,12 @@ function parseForm(formData: FormData) {
     ? (tipusRaw as LocationTipus)
     : 'raktar'
 
-  return { sor, polc, polcsor, tarhely, tipus, aktiv }
+  return { terulet, sor, polc, tarhely, tipus, aktiv }
 }
 
 function validate(v: ReturnType<typeof parseForm>): string | null {
-  if (!v.sor || !v.polc || !v.polcsor || !v.tarhely) {
-    return 'A sor, polc, polcsor és tárhely mezők kötelezők.'
+  if (!v.terulet && !v.sor && !v.polc && !v.tarhely) {
+    return 'Legalább egy mezőt (terület, sor, polc vagy tárhely) ki kell tölteni.'
   }
   return null
 }
@@ -42,9 +42,9 @@ export async function createLocation(
   const qr_kod = computeTeljesKod(v)
 
   const { error } = await supabase.from('locations').insert({
+    terulet: v.terulet,
     sor: v.sor,
     polc: v.polc,
-    polcsor: v.polcsor,
     tarhely: v.tarhely,
     tipus: v.tipus,
     aktiv: v.aktiv,
@@ -78,9 +78,9 @@ export async function updateLocation(
   const { error } = await supabase
     .from('locations')
     .update({
+      terulet: v.terulet,
       sor: v.sor,
       polc: v.polc,
-      polcsor: v.polcsor,
       tarhely: v.tarhely,
       tipus: v.tipus,
       aktiv: v.aktiv,
@@ -105,4 +105,26 @@ export async function toggleLocationActive(id: string, aktiv: boolean) {
   await supabase.from('locations').update({ aktiv }).eq('id', id)
   revalidatePath('/helyek')
   updateTag('locations')
+}
+
+export type DeleteLocationResult = { error?: string }
+
+export async function deleteLocation(id: string): Promise<DeleteLocationResult> {
+  const supabase = await createClient()
+  const { error } = await supabase.from('locations').delete().eq('id', id)
+
+  if (error) {
+    // 23503 = FK violation: a tárhelyre készlet vagy mozgás hivatkozik.
+    if (error.code === '23503') {
+      return {
+        error:
+          'A tárhely nem törölhető, mert készlet vagy mozgás hivatkozik rá. Előbb ürítsd ki, vagy deaktiváld.',
+      }
+    }
+    return { error: 'Törlési hiba: ' + error.message }
+  }
+
+  revalidatePath('/helyek')
+  updateTag('locations')
+  return {}
 }

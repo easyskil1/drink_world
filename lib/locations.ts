@@ -2,9 +2,9 @@ export type LocationTipus = 'pick' | 'raktar' | 'puffer' | 'karanten'
 
 export type Location = {
   id: string
+  terulet: string
   sor: string
   polc: string
-  polcsor: string
   tarhely: string
   teljes_kod: string
   qr_kod: string | null
@@ -33,12 +33,12 @@ export const LOCATION_TIPUS_OPTIONS: { value: LocationTipus; label: string }[] =
  * kliens-oldali előnézethez ugyanezt a formulát használjuk.
  */
 export function computeTeljesKod(parts: {
+  terulet: string
   sor: string
   polc: string
-  polcsor: string
   tarhely: string
 }): string {
-  return [parts.sor, parts.polc, parts.polcsor, parts.tarhely]
+  return [parts.terulet, parts.sor, parts.polc, parts.tarhely]
     .map((p) => p.trim())
-    .join('-')
+    .join('|')
 }

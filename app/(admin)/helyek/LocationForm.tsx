@@ -29,13 +29,14 @@ export function LocationForm({
   >(action, {})
 
   const [parts, setParts] = useState({
+    terulet: initial?.terulet ?? '',
     sor: initial?.sor ?? '',
     polc: initial?.polc ?? '',
-    polcsor: initial?.polcsor ?? '',
     tarhely: initial?.tarhely ?? '',
   })
 
-  const preview = computeTeljesKod(parts)
+  const hasAnyPart = Object.values(parts).some((p) => p.trim() !== '')
+  const preview = hasAnyPart ? computeTeljesKod(parts) : ''
 
   const input =
     'rounded-md border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-200'
@@ -44,16 +45,22 @@ export function LocationForm({
   return (
     <form action={formAction} className="max-w-lg">
       <div className="grid grid-cols-2 gap-4">
-        {(['sor', 'polc', 'polcsor', 'tarhely'] as const).map((field) => (
+        {(
+          [
+            ['terulet', 'Terület'],
+            ['sor', 'Sor'],
+            ['polc', 'Polc'],
+            ['tarhely', 'Tárhely'],
+          ] as const
+        ).map(([field, fieldLabel]) => (
           <label key={field} className={label}>
-            {field[0].toUpperCase() + field.slice(1)}
+            {fieldLabel}
             <input
               name={field}
               value={parts[field]}
               onChange={(e) =>
                 setParts((p) => ({ ...p, [field]: e.target.value }))
               }
-              required
               className={input}
             />
           </label>

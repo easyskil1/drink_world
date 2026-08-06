@@ -9,7 +9,7 @@ export default function NewLocationPage() {
         <div className="min-w-0">
           <h1 className="text-2xl font-semibold text-slate-900">Új tárhely</h1>
           <p className="mt-1 text-sm text-slate-500">
-            A teljes kód a sor/polc/polcsor/tárhely mezőkből generálódik.
+            A teljes kód a terület/sor/polc/tárhely mezőkből generálódik.
           </p>
         </div>
         <Link

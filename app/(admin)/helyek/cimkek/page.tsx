@@ -4,7 +4,12 @@ import { createClient } from '@/lib/supabase/server'
 import { LOCATION_TIPUS_LABEL, type Location } from '@/lib/locations'
 import { PrintButton } from './PrintButton'
 
-type SearchParams = Promise<{ sor?: string; tipus?: string; aktiv?: string }>
+type SearchParams = Promise<{
+  sor?: string
+  tipus?: string
+  aktiv?: string
+  id?: string
+}>
 
 // Csak a cimken megjeleno mezok (H2): QR-forras, kod es tipus-felirat.
 type LabelLocation = Pick<Location, 'id' | 'teljes_kod' | 'tipus' | 'qr_kod'>
@@ -30,10 +35,15 @@ export default async function LabelsPage({
     .select('id, teljes_kod, tipus, qr_kod')
     .order('teljes_kod', { ascending: true })
 
-  if (sp.sor) query = query.ilike('sor', sp.sor)
-  if (sp.tipus) query = query.eq('tipus', sp.tipus)
-  if (sp.aktiv === 'aktiv') query = query.eq('aktiv', true)
-  if (sp.aktiv === 'inaktiv') query = query.eq('aktiv', false)
+  if (sp.id) {
+    // Egyetlen tárhely nyomtatása (a listából, soronkénti gombbal).
+    query = query.eq('id', sp.id)
+  } else {
+    if (sp.sor) query = query.ilike('sor', sp.sor)
+    if (sp.tipus) query = query.eq('tipus', sp.tipus)
+    if (sp.aktiv === 'aktiv') query = query.eq('aktiv', true)
+    if (sp.aktiv === 'inaktiv') query = query.eq('aktiv', false)
+  }
 
   const { data } = await query
   const locations = (data ?? []) as LabelLocation[]

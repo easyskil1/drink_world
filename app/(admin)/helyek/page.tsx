@@ -6,6 +6,7 @@ import {
   type Location,
 } from '@/lib/locations'
 import { toggleLocationActive } from './actions'
+import { DeleteLocationButton } from './DeleteLocationButton'
 
 type SearchParams = Promise<{ sor?: string; tipus?: string; aktiv?: string }>
 
@@ -149,7 +150,13 @@ export default async function LocationsPage({
                 </span>
               )}
             </div>
-            <div className="flex shrink-0 gap-3">
+            <div className="flex shrink-0 flex-wrap gap-3">
+              <Link
+                href={`/helyek/cimkek?id=${loc.id}`}
+                className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+              >
+                Nyomtatás
+              </Link>
               <Link
                 href={`/helyek/${loc.id}`}
                 className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
@@ -164,6 +171,7 @@ export default async function LocationsPage({
                   {loc.aktiv ? 'Deaktivál' : 'Aktivál'}
                 </button>
               </form>
+              <DeleteLocationButton id={loc.id} kod={loc.teljes_kod} />
             </div>
           </li>
         ))}
