@@ -76,17 +76,44 @@ input[type='date'] {
 }
 
 /* ---- Raktári hely címkék (QR) ---- */
+/* A méreteket CSS-változók vezérlik, hogy a címkeoldali méretválasztó
+   (Kicsi / Közepes / Nagy) a data-size attribútummal átállíthassa őket.
+   Alapértelmezés = közepes. */
 .labels-grid {
+  --label-col: 45mm;
+  --label-qr: 22mm;
+  --label-code: 12pt;
+  --label-tipus: 8pt;
+  --label-gap: 3mm;
+  --label-pad: 3mm;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(45mm, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(var(--label-col), 1fr));
   gap: 4mm;
+}
+
+.labels-grid[data-size='s'] {
+  --label-col: 35mm;
+  --label-qr: 16mm;
+  --label-code: 9pt;
+  --label-tipus: 6pt;
+  --label-gap: 2mm;
+  --label-pad: 2mm;
+}
+
+.labels-grid[data-size='l'] {
+  --label-col: 70mm;
+  --label-qr: 34mm;
+  --label-code: 16pt;
+  --label-tipus: 10pt;
+  --label-gap: 4mm;
+  --label-pad: 4mm;
 }
 
 .label {
   display: flex;
   align-items: center;
-  gap: 3mm;
-  padding: 3mm;
+  gap: var(--label-gap);
+  padding: var(--label-pad);
   border: 1px solid #cbd5e1;
   border-radius: 6px;
   background: #fff;
@@ -95,8 +122,8 @@ input[type='date'] {
 }
 
 .label-qr {
-  width: 22mm;
-  height: 22mm;
+  width: var(--label-qr);
+  height: var(--label-qr);
   flex-shrink: 0;
 }
 .label-qr svg {
@@ -111,12 +138,12 @@ input[type='date'] {
 .label-code {
   font-family: var(--font-mono), monospace;
   font-weight: 700;
-  font-size: 12pt;
+  font-size: var(--label-code);
   line-height: 1.2;
   word-break: break-all;
 }
 .label-tipus {
-  font-size: 8pt;
+  font-size: var(--label-tipus);
   color: #64748b;
   text-transform: uppercase;
   letter-spacing: 0.05em;

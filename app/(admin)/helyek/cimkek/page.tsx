@@ -3,6 +3,7 @@ import QRCode from 'qrcode'
 import { createClient } from '@/lib/supabase/server'
 import { LOCATION_TIPUS_LABEL, type Location } from '@/lib/locations'
 import { PrintButton } from './PrintButton'
+import { LabelsView } from './LabelsView'
 
 type SearchParams = Promise<{
   sor?: string
@@ -83,22 +84,14 @@ export default async function LabelsPage({
           Nincs nyomtatható tárhely a szűrésnek megfelelően.
         </p>
       ) : (
-        <div className="labels-grid">
-          {labels.map(({ loc, svg }) => (
-            <div key={loc.id} className="label">
-              <div
-                className="label-qr"
-                dangerouslySetInnerHTML={{ __html: svg }}
-              />
-              <div className="label-text">
-                <div className="label-code">{loc.teljes_kod}</div>
-                <div className="label-tipus">
-                  {LOCATION_TIPUS_LABEL[loc.tipus]}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+        <LabelsView
+          labels={labels.map(({ loc, svg }) => ({
+            id: loc.id,
+            kod: loc.teljes_kod,
+            tipusLabel: LOCATION_TIPUS_LABEL[loc.tipus],
+            svg,
+          }))}
+        />
       )}
     </div>
   )
